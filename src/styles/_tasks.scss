@@ -40,6 +40,19 @@
         }
     }
 }
+
+.add-btn {
+    background-color: transparent;
+    color: var(--color-tertiary);
+    font-size: var(--size-text-l);
+    padding: 8px 4px !important;
+    display: flex;
+    gap: 12px;
+    div:first-child {
+        width: 20px;
+    }
+}
+
 .add-form {
     display: flex;
     margin: 20px 0;

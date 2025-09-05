@@ -35,7 +35,6 @@
                 </nav>
             </div>
         </header>
-
         <main id="app" class="app" role="main">
             <div class="container">
                 <section id="view-list" hidden></section>
@@ -44,7 +43,13 @@
 
             <div class="container" id="add-bar" aria-live="polite"></div>
         </main>
-
+        <footer class="app-footer" role="contentinfo">
+            <div class="container">
+                Сделал
+                <a href="https://kurilov.xyz" target="_blank">Антон Курилов</a>
+                благодаря OpenAI Codex.
+            </div>
+        </footer>
         <!-- Templates -->
         <template id="tmpl-habit-item">
             <li class="task-item" data-id="">
@@ -72,11 +77,9 @@
         </template>
 
         <template id="tmpl-add-button">
-            <button
-                class="btn btn-primary add-btn"
-                title="Добавить новую привычку"
-            >
-                Добавить привычку
+            <button class="btn add-btn" title="Добавить новую привычку">
+                <div>+</div>
+                <div>Добавить привычку</div>
             </button>
         </template>
 
