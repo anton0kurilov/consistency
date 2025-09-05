@@ -1,6 +1,15 @@
 @use './_tasks' as *;
 @use './_stats' as *;
 
+:root {
+    --color-background: #0d0d0d;
+    --color-secondary: #333;
+    --color-brand: #e6c41d;
+    --color-text: #fff;
+    --size-font-m: 24px;
+    --size-font-l: 36px;
+}
+
 * {
     font-family: 'JetBrains Mono', monospace;
     -webkit-tap-highlight-color: transparent;
@@ -8,15 +17,6 @@
     &:focus {
         outline: none;
     }
-}
-
-:root {
-    --color-background: #0d0d0d;
-    --color-brand: #e6c41d;
-    --color-text: #fff;
-    --color-secondary: #333;
-    --size-font-m: 24px;
-    --size-font-l: 36px;
 }
 
 body {
@@ -44,6 +44,7 @@ body {
     line-height: 1;
     &-primary {
         background-color: var(--color-brand);
+        color: #000;
     }
     &-ghost {
         background-color: var(--color-secondary);

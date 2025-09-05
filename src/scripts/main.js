@@ -330,9 +330,10 @@ function setupDragAndDrop(listEl) {
     })
 
     listEl.addEventListener('mouseup', (e) => {
-        const li = (e.target instanceof HTMLElement)
-            ? e.target.closest('.task-item')
-            : null
+        const li =
+            e.target instanceof HTMLElement
+                ? e.target.closest('.task-item')
+                : null
         if (li) li.draggable = false
     })
 
@@ -371,9 +372,7 @@ function setupDragAndDrop(listEl) {
         const habits = loadHabits()
         // Sort habits by current DOM order
         const byId = new Map(habits.map((h) => [h.id, h]))
-        const reordered = ids
-            .map((id) => byId.get(id))
-            .filter(Boolean)
+        const reordered = ids.map((id) => byId.get(id)).filter(Boolean)
         reordered.forEach((h, i) => (h.order = i))
         saveHabits(reordered)
         render(reordered, 'list')
@@ -382,12 +381,12 @@ function setupDragAndDrop(listEl) {
 
 function getDragAfterElement(container, y) {
     const els = [...container.querySelectorAll('.task-item:not(.dragging)')]
-    let closest = { offset: Number.NEGATIVE_INFINITY, element: null }
+    let closest = {offset: Number.NEGATIVE_INFINITY, element: null}
     els.forEach((child) => {
         const box = child.getBoundingClientRect()
         const offset = y - box.top - box.height / 2
         if (offset < 0 && offset > closest.offset) {
-            closest = { offset, element: child }
+            closest = {offset, element: child}
         }
     })
     return closest.element
