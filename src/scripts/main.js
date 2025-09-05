@@ -136,6 +136,7 @@ function renderListView(habits) {
     const list = document.createElement('ul')
     list.className = 'task-list'
 
+    if (habits.length === 0) list.append('Привычек пока нет')
     habits.forEach((h) => {
         const li = cloneTemplate('tmpl-habit-item')
         li.classList.toggle('is-completed', isCompletedOn(h, today))
