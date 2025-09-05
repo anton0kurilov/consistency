@@ -1,0 +1,7 @@
+.app-header .container {
+    flex-direction: column;
+}
+
+.task-name {
+    width: calc(90vw - 20px - 12px);
+}

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Consistency</title>
+        <link rel="stylesheet" href="../src/styles/main.scss" />
+        <link
+            rel="stylesheet"
+            href="../src/styles/mobile.scss"
+            media="screen and (max-width: 600px)"
+        />
+    </head>
+    <body>
+        <header class="app-header" role="banner">
+            <div class="container">
+                <h1 class="app-title">Consistency</h1>
+                <nav aria-label="Навигация по вкладкам">
+                    <button
+                        class="btn tab"
+                        data-tab="list"
+                        aria-controls="view-list"
+                        aria-selected="true"
+                    >
+                        Привычки
+                    </button>
+                    <button
+                        class="btn tab"
+                        data-tab="stats"
+                        aria-controls="view-stats"
+                        aria-selected="false"
+                    >
+                        Статистика
+                    </button>
+                </nav>
+            </div>
+        </header>
+
+        <main id="app" class="app" role="main">
+            <div class="container">
+                <section id="view-list" hidden></section>
+                <section id="view-stats" hidden></section>
+            </div>
+
+            <div class="container" id="add-bar" aria-live="polite"></div>
+        </main>
+
+        <!-- Templates -->
+        <template id="tmpl-habit-item">
+            <li class="task-item" data-id="">
+                <div class="left">
+                    <input type="checkbox" class="task-checkbox" />
+                    <span class="task-name"></span>
+                </div>
+                <div class="right">
+                    <span class="task-streak"></span>
+                    <button
+                        class="btn btn-ghost delete"
+                        title="Удалить привычку"
+                    >
+                        Удалить
+                    </button>
+                    <button
+                        class="btn btn-ghost drag-handle"
+                        title="Перетащить"
+                        aria-label="Перетащить"
+                    >
+                        ⠿
+                    </button>
+                </div>
+            </li>
+        </template>
+
+        <template id="tmpl-add-button">
+            <button
+                class="btn btn-primary add-btn"
+                title="Добавить новую привычку"
+            >
+                Добавить привычку
+            </button>
+        </template>
+
+        <template id="tmpl-add-form">
+            <form class="add-form" autocomplete="off">
+                <input
+                    type="text"
+                    name="name"
+                    class="add-input"
+                    placeholder="Название привычки"
+                    required
+                    maxlength="100"
+                />
+                <button type="submit" class="btn btn-primary">Добавить</button>
+                <button type="button" class="btn btn-ghost cancel">
+                    Отмена
+                </button>
+            </form>
+        </template>
+
+        <template id="tmpl-stats-card">
+            <section class="habit-card">
+                <div class="header">
+                    <h3 class="title"></h3>
+                    <span class="streak"></span>
+                </div>
+                <div class="heatmap"></div>
+            </section>
+        </template>
+
+        <template id="tmpl-heatmap-week-col">
+            <div class="week-col"></div>
+        </template>
+
+        <template id="tmpl-heatmap-day-cell">
+            <div class="day-cell" role="img"></div>
+        </template>
+
+        <script src="../src/scripts/main.js" type="module"></script>
+    </body>
+</html>
