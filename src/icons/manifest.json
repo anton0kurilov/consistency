@@ -1,0 +1,17 @@
+{
+    "short_name": "Consistency",
+    "name": "Consistency",
+    "icons": [
+        {
+            "src": "favicon.svg",
+            "type": "image/svg+xml",
+            "sizes": "any"
+        }
+    ],
+    "start_url": "https://consistency.kurilov.site",
+    "background_color": "#0d0d0d",
+    "display": "standalone",
+    "lang": "ru-RU",
+    "orientation": "portrait-primary",
+    "theme_color": "#0d0d0d"
+}
