@@ -55,7 +55,7 @@
 
 .add-form {
     display: flex;
-    margin: 20px 0;
+    margin: calc(var(--spacing) * 3) 0;
     gap: 10px;
     .add-input {
         background-color: transparent;
@@ -65,10 +65,10 @@
         border-radius: 8px;
         flex: 1;
         &::placeholder {
-            color: var(--color-secondary);
+            color: var(--color-tertiary);
         }
         &:focus {
-            border-color: var(--color-text);
+            border-color: var(--color-tertiary);
         }
     }
 }

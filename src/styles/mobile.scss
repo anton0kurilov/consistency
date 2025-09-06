@@ -4,7 +4,7 @@
         position: fixed;
         z-index: 999;
         width: 100%;
-        padding: 20px 0;
+        padding: calc(var(--spacing) * 3) 0;
         background-color: rgba(13, 13, 13, 0.6);
         backdrop-filter: blur(20px);
         text-align: center;

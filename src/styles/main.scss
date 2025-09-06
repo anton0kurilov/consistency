@@ -7,9 +7,10 @@
     --color-tertiary: #888;
     --color-brand: #e6c41d;
     --color-text: #fff;
-    --size-font-s: 16px;
-    --size-font-m: 24px;
-    --size-font-l: 36px;
+    --size-font-s: 14px;
+    --size-font-m: 18px;
+    --size-font-l: 24px;
+    --spacing: 0.25rem;
 }
 
 * {
@@ -34,6 +35,9 @@ body {
     padding: 0;
     margin: 0;
     width: 100vw;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     overflow-x: hidden;
     background-color: var(--color-background);
     font-size: var(--size-font-m);
@@ -67,7 +71,7 @@ body {
 }
 
 .app-header {
-    padding: 20px 0;
+    padding: calc(var(--spacing) * 3) 0;
     border-bottom: 1px solid var(--color-secondary);
     .container {
         display: flex;
@@ -89,7 +93,8 @@ body {
 }
 
 .app {
-    margin: 20px 0;
+    margin: calc(var(--spacing) * 3) 0;
+    flex: 1;
 }
 
 #view-stats,
@@ -99,7 +104,7 @@ body {
 }
 
 .app-footer {
-    padding: 20px;
+    padding: calc(var(--spacing) * 3);
     font-size: var(--size-font-s);
     color: var(--color-tertiary);
     text-align: center;
