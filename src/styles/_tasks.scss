@@ -34,10 +34,6 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        &.dragging {
-            opacity: 0.6;
-            outline: 1px dashed var(--color-secondary);
-        }
     }
 }
 
@@ -110,14 +106,5 @@
         &::after {
             opacity: 1;
         }
-    }
-}
-
-.drag-handle {
-    cursor: grab;
-    display: inline-grid;
-    place-items: center;
-    &:active {
-        cursor: grabbing;
     }
 }

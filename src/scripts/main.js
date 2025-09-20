@@ -159,9 +159,6 @@ function renderListView(habits) {
 
     container.replaceChildren(list)
 
-    // Enable drag-and-drop sorting
-    setupDragAndDrop(list)
-
     renderAddBar()
 }
 
@@ -314,83 +311,6 @@ function bindEvents() {
             return
         }
     })
-}
-
-// Drag & Drop sorting using a handle
-function setupDragAndDrop(listEl) {
-    let draggingEl = null
-
-    // Make item draggable only while using the handle
-    listEl.addEventListener('mousedown', (e) => {
-        const t = e.target
-        if (!(t instanceof HTMLElement)) return
-        if (!t.classList.contains('drag-handle')) return
-        const li = t.closest('.task-item')
-        if (!li) return
-        li.draggable = true
-    })
-
-    listEl.addEventListener('mouseup', (e) => {
-        const li =
-            e.target instanceof HTMLElement
-                ? e.target.closest('.task-item')
-                : null
-        if (li) li.draggable = false
-    })
-
-    listEl.addEventListener('dragstart', (e) => {
-        const t = e.target
-        if (!(t instanceof HTMLElement)) return
-        const li = t.closest('.task-item')
-        if (!li) return
-        draggingEl = li
-        li.classList.add('dragging')
-        e.dataTransfer?.setData('text/plain', li.dataset.id || '')
-        e.dataTransfer?.setDragImage(li, 10, 10)
-    })
-
-    listEl.addEventListener('dragover', (e) => {
-        e.preventDefault()
-        const after = getDragAfterElement(listEl, e.clientY)
-        const dragging = listEl.querySelector('.dragging')
-        if (!dragging) return
-        if (after == null) {
-            listEl.appendChild(dragging)
-        } else {
-            listEl.insertBefore(dragging, after)
-        }
-    })
-
-    listEl.addEventListener('dragend', () => {
-        if (!draggingEl) return
-        draggingEl.classList.remove('dragging')
-        draggingEl.draggable = false
-        draggingEl = null
-        // Persist new order
-        const ids = Array.from(listEl.querySelectorAll('.task-item')).map(
-            (el) => el.dataset.id
-        )
-        const habits = loadHabits()
-        // Sort habits by current DOM order
-        const byId = new Map(habits.map((h) => [h.id, h]))
-        const reordered = ids.map((id) => byId.get(id)).filter(Boolean)
-        reordered.forEach((h, i) => (h.order = i))
-        saveHabits(reordered)
-        render(reordered, 'list')
-    })
-}
-
-function getDragAfterElement(container, y) {
-    const els = [...container.querySelectorAll('.task-item:not(.dragging)')]
-    let closest = {offset: Number.NEGATIVE_INFINITY, element: null}
-    els.forEach((child) => {
-        const box = child.getBoundingClientRect()
-        const offset = y - box.top - box.height / 2
-        if (offset < 0 && offset > closest.offset) {
-            closest = {offset, element: child}
-        }
-    })
-    return closest.element
 }
 
 // Bootstrap
