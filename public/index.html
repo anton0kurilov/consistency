@@ -55,12 +55,14 @@
         <!-- Templates -->
         <template id="tmpl-habit-item">
             <li class="task-item" data-id="">
-                <div class="left">
-                    <input type="checkbox" class="task-checkbox" />
-                    <span class="task-name"></span>
-                </div>
-                <div class="right">
-                    <span class="task-streak"></span>
+                <div class="task-swipe">
+                    <div class="task-main">
+                        <div class="left">
+                            <input type="checkbox" class="task-checkbox" />
+                            <span class="task-name"></span>
+                        </div>
+                        <span class="task-streak"></span>
+                    </div>
                     <button
                         class="btn btn-ghost delete"
                         title="Удалить привычку"

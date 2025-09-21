@@ -18,3 +18,37 @@
 .task-name {
     max-width: 40vw;
 }
+
+.task-list {
+    .task-item {
+        --swipe-delete-width: 96px;
+        overflow: hidden;
+        .task-swipe {
+            touch-action: pan-y;
+        }
+        .task-main {
+            transition: transform 180ms ease;
+            padding-right: 12px;
+        }
+        .delete {
+            position: absolute;
+            top: 50%;
+            right: 0;
+            transform: translate(100%, -50%);
+            transition: transform 180ms ease;
+            width: var(--swipe-delete-width);
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        &.is-swipe-open {
+            .task-main {
+                transform: translateX(calc(-1 * var(--swipe-delete-width)));
+            }
+            .delete {
+                transform: translate(0, -50%);
+            }
+        }
+    }
+}
