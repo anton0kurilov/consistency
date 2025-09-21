@@ -16,7 +16,7 @@
 }
 
 .task-name {
-    max-width: 40vw;
+    max-width: 60vw;
 }
 
 .task-list {
@@ -48,6 +48,12 @@
             }
             .delete {
                 transform: translate(0, -50%);
+            }
+        }
+        &.is-dragging {
+            .task-main,
+            .delete {
+                transition: none;
             }
         }
     }

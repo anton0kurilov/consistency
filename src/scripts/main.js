@@ -48,6 +48,167 @@ const addDays = (d, n) => {
 
 const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36)
 
+// Swipe-to-delete (mobile)
+let swipeState = null
+let openSwipeItem = null
+
+const SWIPE_DELETE_WIDTH_FALLBACK = 96
+const SWIPE_THRESHOLD_RATIO = 0.4
+
+function isSwipeEnabledEnvironment() {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+        return false
+    }
+    const mq = window.matchMedia?.('(max-width: 600px)')
+    const coarse = window.matchMedia?.('(pointer: coarse)')
+    return Boolean(mq?.matches && coarse?.matches)
+}
+
+function getSwipeElements(item) {
+    const main = item.querySelector('.task-main')
+    const del = item.querySelector('.delete')
+    if (!main || !del) return null
+    return { main, del }
+}
+
+function getSwipeWidth(item, btn) {
+    const rect = btn.getBoundingClientRect()
+    if (rect.width) return rect.width
+    const style = getComputedStyle(item)
+    const cssVar = style.getPropertyValue('--swipe-delete-width')
+    const parsed = parseFloat(cssVar)
+    if (!Number.isNaN(parsed) && parsed > 0) return parsed
+    return SWIPE_DELETE_WIDTH_FALLBACK
+}
+
+function applySwipeTranslate(state, translate) {
+    state.currentTranslate = translate
+    state.main.style.transform = `translateX(${translate}px)`
+    const progress = 1 + translate / state.maxReveal
+    const clamped = Math.min(1, Math.max(0, progress))
+    state.del.style.transform = `translate(${clamped * 100}%, -50%)`
+}
+
+function finishSwipe(open) {
+    if (!swipeState) return
+    const { item, main, del } = swipeState
+    item.classList.remove('is-dragging')
+    main.style.transition = ''
+    del.style.transition = ''
+    main.style.transform = ''
+    del.style.transform = ''
+
+    if (open) {
+        if (openSwipeItem && openSwipeItem !== item) {
+            closeSwipe(openSwipeItem)
+        }
+        item.classList.add('is-swipe-open')
+        openSwipeItem = item
+    } else {
+        item.classList.remove('is-swipe-open')
+        if (openSwipeItem === item) openSwipeItem = null
+    }
+
+    swipeState = null
+}
+
+function closeSwipe(item) {
+    if (!item) return
+    item.classList.remove('is-swipe-open')
+    if (openSwipeItem === item) openSwipeItem = null
+}
+
+function handleSwipePointerDown(e) {
+    if (!isSwipeEnabledEnvironment()) return
+    if (e.pointerType !== 'touch') return
+    if (!(e.target instanceof HTMLElement)) return
+    const item = e.target.closest('.task-item')
+    if (!item) {
+        if (openSwipeItem) closeSwipe(openSwipeItem)
+        return
+    }
+    if (e.target.closest('.delete')) return
+
+    const elements = getSwipeElements(item)
+    if (!elements) return
+
+    const { main, del } = elements
+    const maxReveal = getSwipeWidth(item, del)
+
+    if (openSwipeItem && openSwipeItem !== item) {
+        closeSwipe(openSwipeItem)
+    }
+
+    swipeState = {
+        pointerId: e.pointerId,
+        item,
+        main,
+        del,
+        startX: e.clientX,
+        startY: e.clientY,
+        startTranslate: item.classList.contains('is-swipe-open')
+            ? -maxReveal
+            : 0,
+        currentTranslate: 0,
+        maxReveal,
+        active: false,
+    }
+}
+
+function handleSwipePointerMove(e) {
+    if (!swipeState) return
+    if (e.pointerId !== swipeState.pointerId) return
+
+    const deltaX = e.clientX - swipeState.startX
+    const deltaY = e.clientY - swipeState.startY
+
+    if (!swipeState.active) {
+        if (Math.abs(deltaX) < 8) return
+        if (Math.abs(deltaY) > Math.abs(deltaX)) {
+            swipeState = null
+            return
+        }
+        swipeState.active = true
+        swipeState.item.classList.add('is-dragging')
+        swipeState.main.style.transition = 'none'
+        swipeState.del.style.transition = 'none'
+        try {
+            swipeState.item.setPointerCapture(e.pointerId)
+        } catch {}
+    }
+
+    const next = Math.max(
+        -swipeState.maxReveal,
+        Math.min(0, swipeState.startTranslate + deltaX)
+    )
+    applySwipeTranslate(swipeState, next)
+    e.preventDefault()
+}
+
+function handleSwipePointerEnd(e) {
+    if (!swipeState) return
+    if (e.pointerId !== swipeState.pointerId) return
+
+    if (!swipeState.active) {
+        finishSwipe(false)
+        return
+    }
+
+    const shouldOpen =
+        swipeState.currentTranslate <= -swipeState.maxReveal * SWIPE_THRESHOLD_RATIO
+
+    finishSwipe(shouldOpen)
+}
+
+function handleGlobalPointerDown(e) {
+    if (!openSwipeItem) return
+    if (e.pointerType !== 'touch') return
+    if (!(e.target instanceof HTMLElement)) return
+    const item = e.target.closest('.task-item')
+    if (item === openSwipeItem) return
+    closeSwipe(openSwipeItem)
+}
+
 // Storage
 function loadHabits() {
     try {
@@ -158,6 +319,7 @@ function renderListView(habits) {
     })
 
     container.replaceChildren(list)
+    openSwipeItem = null
 
     renderAddBar()
 }
@@ -275,6 +437,10 @@ function bindEvents() {
 
     // Delegated events for list view
     const listView = document.getElementById('view-list')
+    listView.addEventListener('pointerdown', handleSwipePointerDown)
+    listView.addEventListener('pointermove', handleSwipePointerMove)
+    listView.addEventListener('pointerup', handleSwipePointerEnd)
+    listView.addEventListener('pointercancel', handleSwipePointerEnd)
     listView.addEventListener('change', (e) => {
         const t = e.target
         if (!(t instanceof HTMLInputElement)) return
@@ -302,6 +468,9 @@ function bindEvents() {
 
         if (t.classList.contains('delete')) {
             if (confirm('Удалить привычку?')) {
+                if (li === openSwipeItem) {
+                    openSwipeItem = null
+                }
                 habits.splice(idx, 1)
                 // Re-number orders
                 habits.forEach((h, i) => (h.order = i))
@@ -311,6 +480,8 @@ function bindEvents() {
             return
         }
     })
+
+    document.addEventListener('pointerdown', handleGlobalPointerDown)
 }
 
 // Bootstrap
