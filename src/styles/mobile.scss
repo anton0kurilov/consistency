@@ -59,6 +59,13 @@
     }
 }
 
+.add-form {
+    flex-direction: column;
+    button {
+        width: 100%;
+    }
+}
+
 .app-footer {
     margin-bottom: calc(var(--size-font-m) + 16px + (var(--spacing) * 4) * 2);
 }

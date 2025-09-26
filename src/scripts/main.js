@@ -68,7 +68,7 @@ function getSwipeElements(item) {
     const main = item.querySelector('.task-main')
     const del = item.querySelector('.delete')
     if (!main || !del) return null
-    return { main, del }
+    return {main, del}
 }
 
 function getSwipeWidth(item, btn) {
@@ -91,7 +91,7 @@ function applySwipeTranslate(state, translate) {
 
 function finishSwipe(open) {
     if (!swipeState) return
-    const { item, main, del } = swipeState
+    const {item, main, del} = swipeState
     item.classList.remove('is-dragging')
     main.style.transition = ''
     del.style.transition = ''
@@ -132,7 +132,7 @@ function handleSwipePointerDown(e) {
     const elements = getSwipeElements(item)
     if (!elements) return
 
-    const { main, del } = elements
+    const {main, del} = elements
     const maxReveal = getSwipeWidth(item, del)
 
     if (openSwipeItem && openSwipeItem !== item) {
@@ -195,7 +195,8 @@ function handleSwipePointerEnd(e) {
     }
 
     const shouldOpen =
-        swipeState.currentTranslate <= -swipeState.maxReveal * SWIPE_THRESHOLD_RATIO
+        swipeState.currentTranslate <=
+        -swipeState.maxReveal * SWIPE_THRESHOLD_RATIO
 
     finishSwipe(shouldOpen)
 }
