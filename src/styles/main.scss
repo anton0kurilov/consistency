@@ -81,6 +81,11 @@ body {
     .app-title {
         margin: 0;
         font-size: var(--size-font-l);
+        sup {
+            font-size: var(--size-font-s);
+            margin-left: 2px;
+            color: var(--color-tertiary);
+        }
     }
     .tab {
         background-color: transparent;
