@@ -58,3 +58,7 @@
         }
     }
 }
+
+.app-footer {
+    margin-bottom: calc(var(--size-font-m) + 16px + (var(--spacing) * 4) * 2);
+}
