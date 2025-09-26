@@ -70,8 +70,9 @@
         background-color: transparent;
         border: 2px solid var(--color-secondary);
         color: var(--color-text);
-        padding: 10px 10px;
+        padding: 8px 10px;
         border-radius: 8px;
+        font-size: 16px;
         flex: 1;
         &::placeholder {
             color: var(--color-tertiary);
