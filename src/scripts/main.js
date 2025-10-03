@@ -52,7 +52,7 @@ const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36)
 let swipeState = null
 let openSwipeItem = null
 
-const SWIPE_DELETE_WIDTH_FALLBACK = 96
+const SWIPE_ACTIONS_WIDTH_FALLBACK = 200
 const SWIPE_THRESHOLD_RATIO = 0.4
 
 function isSwipeEnabledEnvironment() {
@@ -66,19 +66,19 @@ function isSwipeEnabledEnvironment() {
 
 function getSwipeElements(item) {
     const main = item.querySelector('.task-main')
-    const del = item.querySelector('.delete')
-    if (!main || !del) return null
-    return {main, del}
+    const actions = item.querySelector('.task-actions')
+    if (!main || !actions) return null
+    return {main, actions}
 }
 
-function getSwipeWidth(item, btn) {
-    const rect = btn.getBoundingClientRect()
+function getSwipeWidth(item, actions) {
+    const rect = actions.getBoundingClientRect()
     if (rect.width) return rect.width
     const style = getComputedStyle(item)
-    const cssVar = style.getPropertyValue('--swipe-delete-width')
+    const cssVar = style.getPropertyValue('--swipe-actions-width')
     const parsed = parseFloat(cssVar)
     if (!Number.isNaN(parsed) && parsed > 0) return parsed
-    return SWIPE_DELETE_WIDTH_FALLBACK
+    return SWIPE_ACTIONS_WIDTH_FALLBACK
 }
 
 function applySwipeTranslate(state, translate) {
@@ -86,17 +86,17 @@ function applySwipeTranslate(state, translate) {
     state.main.style.transform = `translateX(${translate}px)`
     const progress = 1 + translate / state.maxReveal
     const clamped = Math.min(1, Math.max(0, progress))
-    state.del.style.transform = `translate(${clamped * 100}%, -50%)`
+    state.actions.style.transform = `translate(${clamped * 100}%, -50%)`
 }
 
 function finishSwipe(open) {
     if (!swipeState) return
-    const {item, main, del} = swipeState
+    const {item, main, actions} = swipeState
     item.classList.remove('is-dragging')
     main.style.transition = ''
-    del.style.transition = ''
+    actions.style.transition = ''
     main.style.transform = ''
-    del.style.transform = ''
+    actions.style.transform = ''
 
     if (open) {
         if (openSwipeItem && openSwipeItem !== item) {
@@ -127,13 +127,13 @@ function handleSwipePointerDown(e) {
         if (openSwipeItem) closeSwipe(openSwipeItem)
         return
     }
-    if (e.target.closest('.delete')) return
+    if (e.target.closest('.task-actions')) return
 
     const elements = getSwipeElements(item)
     if (!elements) return
 
-    const {main, del} = elements
-    const maxReveal = getSwipeWidth(item, del)
+    const {main, actions} = elements
+    const maxReveal = getSwipeWidth(item, actions)
 
     if (openSwipeItem && openSwipeItem !== item) {
         closeSwipe(openSwipeItem)
@@ -143,7 +143,7 @@ function handleSwipePointerDown(e) {
         pointerId: e.pointerId,
         item,
         main,
-        del,
+        actions,
         startX: e.clientX,
         startY: e.clientY,
         startTranslate: item.classList.contains('is-swipe-open')
@@ -171,7 +171,7 @@ function handleSwipePointerMove(e) {
         swipeState.active = true
         swipeState.item.classList.add('is-dragging')
         swipeState.main.style.transition = 'none'
-        swipeState.del.style.transition = 'none'
+        swipeState.actions.style.transition = 'none'
         try {
             swipeState.item.setPointerCapture(e.pointerId)
         } catch {}
@@ -478,6 +478,30 @@ function bindEvents() {
                 saveHabits(habits)
                 render(habits, 'list')
             }
+            return
+        } else if (t.classList.contains('edit')) {
+            if (li === openSwipeItem) {
+                closeSwipe(li)
+            }
+            const currentName = habits[idx].name
+            const nextName = prompt(
+                'Введите новое название привычки',
+                currentName
+            )
+            if (nextName === null) return
+            const trimmed = nextName.trim()
+            if (!trimmed) {
+                alert('Название не может быть пустым')
+                return
+            }
+            if (trimmed.length > 100) {
+                alert('Название не может быть длиннее 100 символов')
+                return
+            }
+            if (trimmed === currentName) return
+            habits[idx].name = trimmed
+            saveHabits(habits)
+            render(habits, 'list')
             return
         }
     })

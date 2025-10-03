@@ -21,7 +21,11 @@
 
 .task-list {
     .task-item {
-        --swipe-delete-width: 96px;
+        --swipe-action-button-width: 96px;
+        --swipe-actions-gap: 8px;
+        --swipe-actions-width: calc(
+            var(--swipe-action-button-width) * 2 + var(--swipe-actions-gap)
+        );
         overflow: hidden;
         .task-swipe {
             touch-action: pan-y;
@@ -30,29 +34,35 @@
             transition: transform 180ms ease;
             padding-right: 12px;
         }
-        .delete {
+        .task-actions {
             position: absolute;
             top: 50%;
             right: 0;
             transform: translate(100%, -50%);
             transition: transform 180ms ease;
-            width: var(--swipe-delete-width);
+            width: var(--swipe-actions-width);
             min-height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: var(--swipe-actions-gap);
+        }
+        .task-actions .btn {
+            flex: 0 0 var(--swipe-action-button-width);
+            min-width: 0;
+            justify-content: center;
         }
         &.is-swipe-open {
             .task-main {
-                transform: translateX(calc(-1 * var(--swipe-delete-width)));
+                transform: translateX(calc(-1 * var(--swipe-actions-width)));
             }
-            .delete {
+            .task-actions {
                 transform: translate(0, -50%);
             }
         }
         &.is-dragging {
             .task-main,
-            .delete {
+            .task-actions {
                 transition: none;
             }
         }
