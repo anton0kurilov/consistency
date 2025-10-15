@@ -3,6 +3,7 @@
 
 const STORAGE_KEY = 'consistency:habits'
 const TAB_KEY = 'consistency:lastTab'
+const MS_PER_DAY = 24 * 60 * 60 * 1000
 
 // Utilities
 const $ = (sel, root = document) => root.querySelector(sel)
@@ -274,6 +275,63 @@ function calcStreak(habit) {
     return count
 }
 
+function toStartOfDay(date) {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+        return null
+    }
+    const copy = new Date(date)
+    copy.setHours(0, 0, 0, 0)
+    return copy
+}
+
+function parseDateKeyToDate(key) {
+    if (typeof key !== 'string') return null
+    const parts = key.split('-').map((p) => Number.parseInt(p, 10))
+    if (parts.length !== 3) return null
+    const [year, month, day] = parts
+    if (!year || !month || !day) return null
+    const date = new Date(year, month - 1, day)
+    return toStartOfDay(date)
+}
+
+function getHabitStartDate(habit) {
+    const created = toStartOfDay(new Date(habit.createdAt))
+    if (created) return created
+    const completions = Array.isArray(habit.completions)
+        ? habit.completions.slice().sort()
+        : []
+    if (completions.length === 0) return null
+    return parseDateKeyToDate(completions[0])
+}
+
+function getHabitActiveDays(habit) {
+    const start = getHabitStartDate(habit)
+    if (!start) return 0
+    const today = toStartOfDay(new Date())
+    if (!today) return 0
+    const diff = Math.floor((today.getTime() - start.getTime()) / MS_PER_DAY)
+    if (diff < 0) return 0
+    return diff + 1
+}
+
+function calcCompletionStats(habit) {
+    const totalCompletions = getCompletionsSet(habit).size
+    const daysSinceStart = getHabitActiveDays(habit)
+    const totalDays = Math.max(daysSinceStart, totalCompletions)
+    const percent =
+        totalDays > 0 ? Math.round((totalCompletions / totalDays) * 100) : 0
+    return {totalCompletions, totalDays, completionPercent: percent}
+}
+
+function pluralize(n, forms) {
+    const abs = Math.abs(n) % 100
+    const last = abs % 10
+    if (abs > 10 && abs < 20) return forms[2]
+    if (last > 1 && last < 5) return forms[1]
+    if (last === 1) return forms[0]
+    return forms[2]
+}
+
 // Views
 function renderTabs(active) {
     const listBtn = document.querySelector('button.tab[data-tab="list"]')
@@ -371,43 +429,97 @@ function renderStatsView(habits) {
     const wrap = document.createElement('div')
     wrap.className = 'stats'
 
-    const end = new Date()
-    const endWeek = startOfWeek(end, 1) // Monday
-    const weeks = 53 // roughly 1 year
-    const start = addDays(endWeek, -(weeks - 1) * 7)
+    if (habits.length === 0) {
+        const empty = document.createElement('p')
+        empty.className = 'stats__empty'
+        empty.textContent =
+            'Добавьте привычки, чтобы увидеть их статистику.'
+        wrap.append(empty)
+        container.replaceChildren(wrap)
+        return
+    }
 
-    habits.forEach((h) => {
-        const card = cloneTemplate('tmpl-stats-card')
-        const title = card.querySelector('.title')
-        const streak = card.querySelector('.streak')
-        if (title) title.textContent = h.name
-        if (streak) streak.textContent = `${calcStreak(h)} 🔥`
-        const grid = card.querySelector('.heatmap')
+    const today = toStartOfDay(new Date())
+    const weeks = 4
+    const endWeek = startOfWeek(today, 1)
+    const rangeStart = addDays(endWeek, -(weeks - 1) * 7)
 
-        const set = getCompletionsSet(h)
-
-        // Build columns per week
-        for (let w = 0; w < weeks; w++) {
-            const col = cloneTemplate('tmpl-heatmap-week-col')
-
-            const weekStart = addDays(start, w * 7)
-            for (let d = 0; d < 7; d++) {
-                const day = addDays(weekStart, d)
-                const k = dateKey(day)
-                const cell = cloneTemplate('tmpl-heatmap-day-cell')
-                const done = set.has(k)
-                if (done) cell.classList.add('is-done')
-                cell.title = `${k} • ${done ? 'выполнено' : 'нет'}`
-                cell.setAttribute(
-                    'aria-label',
-                    `${k}: ${done ? 'выполнено' : 'не выполнено'}`
-                )
-                col.append(cell)
-            }
-            grid.append(col)
+    habits.forEach((habit) => {
+        const group = cloneTemplate('tmpl-habit-stats')
+        const title = group.querySelector('.habit-stats__title')
+        if (title) title.textContent = habit.name
+        const cards = group.querySelector('.habit-stats__cards')
+        if (!cards) {
+            wrap.append(group)
+            return
         }
 
-        wrap.append(card)
+        const streakCount = calcStreak(habit)
+        const {totalCompletions, totalDays, completionPercent} =
+            calcCompletionStats(habit)
+
+        const streakCard = cloneTemplate('tmpl-stats-info-card')
+        streakCard.classList.add('stat-card--streak')
+        const streakTitle = streakCard.querySelector('.stat-card__title')
+        if (streakTitle) streakTitle.textContent = 'Текущий стрик'
+        const streakValue = streakCard.querySelector('.stat-card__value')
+        if (streakValue) streakValue.textContent = `${streakCount} 🔥`
+        const streakMeta = streakCard.querySelector('.stat-card__meta')
+        if (streakMeta) {
+            const word = pluralize(streakCount, ['день', 'дня', 'дней'])
+            streakMeta.textContent = `${word} подряд`
+        }
+        cards.append(streakCard)
+
+        const totalsCard = cloneTemplate('tmpl-stats-info-card')
+        totalsCard.classList.add('stat-card--totals')
+        const totalsTitle = totalsCard.querySelector('.stat-card__title')
+        if (totalsTitle) totalsTitle.textContent = 'Выполненные дни'
+        const totalsValue = totalsCard.querySelector('.stat-card__value')
+        if (totalsValue) totalsValue.textContent = String(totalCompletions)
+        const totalsMeta = totalsCard.querySelector('.stat-card__meta')
+        if (totalsMeta) {
+            const daysLabel = totalDays === 1 ? 'дня' : 'дней'
+            totalsMeta.textContent = `из ${totalDays} ${daysLabel} • ${completionPercent}%`
+        }
+        cards.append(totalsCard)
+
+        const heatmapCard = cloneTemplate('tmpl-stats-heatmap-card')
+        const heatmapTitle = heatmapCard.querySelector('.stat-card__title')
+        if (heatmapTitle) heatmapTitle.textContent = 'Последние 4 недели'
+        const grid = heatmapCard.querySelector('.heatmap')
+        if (grid) {
+            const set = getCompletionsSet(habit)
+            for (let w = 0; w < weeks; w++) {
+                const col = cloneTemplate('tmpl-heatmap-week-col')
+                const weekStart = addDays(rangeStart, w * 7)
+                for (let d = 0; d < 7; d++) {
+                    const day = addDays(weekStart, d)
+                    const key = dateKey(day)
+                    const cell = cloneTemplate('tmpl-heatmap-day-cell')
+                    const done = set.has(key)
+                    const isFuture =
+                        today && day.getTime() > today.getTime()
+                    if (done) cell.classList.add('is-done')
+                    if (isFuture) cell.classList.add('is-future')
+                    const statusLabel = isFuture
+                        ? 'день ещё не наступил'
+                        : done
+                          ? 'выполнено'
+                          : 'не выполнено'
+                    cell.title = `${key} • ${statusLabel}`
+                    cell.setAttribute(
+                        'aria-label',
+                        `${key}: ${statusLabel}`
+                    )
+                    col.append(cell)
+                }
+                grid.append(col)
+            }
+        }
+        cards.append(heatmapCard)
+
+        wrap.append(group)
     })
 
     container.replaceChildren(wrap)

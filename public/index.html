@@ -109,14 +109,28 @@
             </form>
         </template>
 
-        <template id="tmpl-stats-card">
-            <section class="habit-card">
-                <div class="header">
-                    <h3 class="title"></h3>
-                    <span class="streak"></span>
-                </div>
-                <div class="heatmap"></div>
+        <template id="tmpl-habit-stats">
+            <section class="habit-stats">
+                <header class="habit-stats__header">
+                    <h3 class="habit-stats__title"></h3>
+                </header>
+                <div class="habit-stats__cards"></div>
             </section>
+        </template>
+
+        <template id="tmpl-stats-info-card">
+            <article class="stat-card">
+                <h4 class="stat-card__title"></h4>
+                <div class="stat-card__value"></div>
+                <p class="stat-card__meta"></p>
+            </article>
+        </template>
+
+        <template id="tmpl-stats-heatmap-card">
+            <article class="stat-card stat-card--heatmap">
+                <h4 class="stat-card__title"></h4>
+                <div class="heatmap"></div>
+            </article>
         </template>
 
         <template id="tmpl-heatmap-week-col">
