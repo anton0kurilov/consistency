@@ -432,8 +432,7 @@ function renderStatsView(habits) {
     if (habits.length === 0) {
         const empty = document.createElement('p')
         empty.className = 'stats__empty'
-        empty.textContent =
-            'Добавьте привычки, чтобы увидеть их статистику.'
+        empty.textContent = 'Добавьте привычки, чтобы увидеть их статистику.'
         wrap.append(empty)
         container.replaceChildren(wrap)
         return
@@ -498,20 +497,16 @@ function renderStatsView(habits) {
                     const key = dateKey(day)
                     const cell = cloneTemplate('tmpl-heatmap-day-cell')
                     const done = set.has(key)
-                    const isFuture =
-                        today && day.getTime() > today.getTime()
+                    const isFuture = today && day.getTime() > today.getTime()
                     if (done) cell.classList.add('is-done')
                     if (isFuture) cell.classList.add('is-future')
                     const statusLabel = isFuture
                         ? 'день ещё не наступил'
                         : done
-                          ? 'выполнено'
-                          : 'не выполнено'
+                        ? 'выполнено'
+                        : 'не выполнено'
                     cell.title = `${key} • ${statusLabel}`
-                    cell.setAttribute(
-                        'aria-label',
-                        `${key}: ${statusLabel}`
-                    )
+                    cell.setAttribute('aria-label', `${key}: ${statusLabel}`)
                     col.append(cell)
                 }
                 grid.append(col)
@@ -535,6 +530,8 @@ function render(habits, activeTab) {
     }
     const addBar = document.getElementById('add-bar')
     if (addBar) addBar.hidden = activeTab !== 'list'
+    const footer = document.querySelector('.app-footer')
+    if (footer) footer.hidden = activeTab === 'list'
 }
 
 // Events
