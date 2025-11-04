@@ -396,7 +396,7 @@ function renderAddBar(showForm = false) {
     }
 
     const form = cloneTemplate('tmpl-add-form')
-    const input = form.querySelector('input[name="name"]')
+    const input = form.querySelector('input[name="task-name"]')
     const cancel = form.querySelector('.cancel')
     cancel?.addEventListener('click', () => renderAddBar(false))
 
