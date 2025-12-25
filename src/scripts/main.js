@@ -4,6 +4,7 @@
 const STORAGE_KEY = 'consistency:habits'
 const TAB_KEY = 'consistency:lastTab'
 const MS_PER_DAY = 24 * 60 * 60 * 1000
+const MAX_PAST_DAYS = 5
 
 // Utilities
 const $ = (sel, root = document) => root.querySelector(sel)
@@ -23,6 +24,8 @@ const todayKey = () => {
     const day = String(d.getDate()).padStart(2, '0')
     return `${y}-${m}-${day}` // YYYY-MM-DD in local time
 }
+
+let selectedDayKey = todayKey()
 
 const dateKey = (d) => {
     const y = d.getFullYear()
@@ -48,6 +51,41 @@ const addDays = (d, n) => {
 }
 
 const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36)
+
+const formatDayTitle = (date) =>
+    new Intl.DateTimeFormat('ru-RU', {
+        weekday: 'long',
+        day: '2-digit',
+        month: 'long',
+    }).format(date)
+
+const formatDayTitleByKey = (key) => {
+    const parsed = parseDateKeyToDate(key)
+    if (!parsed) return key
+    return formatDayTitle(parsed)
+}
+
+const getRecentDayOptions = () => {
+    const days = []
+    for (let offset = 0; offset <= MAX_PAST_DAYS; offset++) {
+        const date = addDays(new Date(), -offset)
+        days.push({
+            key: dateKey(date),
+            date,
+            dayNumber: String(date.getDate()),
+            weekday: new Intl.DateTimeFormat('ru-RU', {
+                weekday: 'short',
+            })
+                .format(date)
+                .replace('.', '')
+                .toUpperCase(),
+            title: formatDayTitle(date),
+            isToday: offset === 0,
+            isYesterday: offset === 1,
+        })
+    }
+    return days
+}
 
 // Swipe-to-delete (mobile)
 let swipeState = null
@@ -348,10 +386,68 @@ function renderTabs(active) {
     localStorage.setItem(TAB_KEY, active)
 }
 
-function renderListView(habits) {
+function renderDaySwitcher(activeTab) {
+    const container = document.getElementById('day-switcher')
+    if (!container) return
+
+    if (activeTab !== 'list') {
+        container.hidden = true
+        container.replaceChildren()
+        return
+    }
+
+    const options = getRecentDayOptions()
+    if (!options.some((o) => o.key === selectedDayKey)) {
+        selectedDayKey = options[0]?.key || todayKey()
+    }
+
+    const wrap = document.createElement('div')
+    wrap.className = 'day-switcher'
+    wrap.setAttribute('role', 'group')
+    wrap.setAttribute('aria-label', 'Выбор дня')
+    options.forEach(
+        ({key, dayNumber, weekday, title, isToday, isYesterday}) => {
+            const btn = document.createElement('button')
+            btn.type = 'button'
+            btn.className = 'btn day-switcher__btn'
+            btn.dataset.dateKey = key
+            const ariaLabelSuffix =
+                isToday || isYesterday
+                    ? isToday
+                        ? 'Сегодня'
+                        : 'Вчера'
+                    : ''
+            btn.title = ariaLabelSuffix ? `${title} • ${ariaLabelSuffix}` : title
+            btn.setAttribute('aria-label', btn.title)
+
+            const dateEl = document.createElement('span')
+            dateEl.className = 'day-switcher__date'
+            dateEl.textContent = dayNumber
+
+            const weekdayEl = document.createElement('span')
+            weekdayEl.className = 'day-switcher__weekday'
+            weekdayEl.textContent = weekday
+
+            btn.append(dateEl, weekdayEl)
+            btn.setAttribute('aria-pressed', String(key === selectedDayKey))
+            if (key === selectedDayKey) btn.classList.add('is-active')
+            btn.addEventListener('click', () => {
+                selectedDayKey = key
+                const habits = loadHabits()
+                render(habits, 'list')
+            })
+            wrap.append(btn)
+        }
+    )
+
+    container.hidden = false
+    container.replaceChildren(wrap)
+}
+
+function renderListView(habits, dayKey) {
     const container = document.getElementById('view-list')
     if (!container) return
-    const today = todayKey()
+    const currentDay = dayKey || todayKey()
 
     const list = document.createElement('ul')
     list.className = 'task-list'
@@ -359,15 +455,20 @@ function renderListView(habits) {
     if (habits.length === 0) list.append('Привычек пока нет')
     habits.forEach((h) => {
         const li = cloneTemplate('tmpl-habit-item')
-        li.classList.toggle('is-completed', isCompletedOn(h, today))
+        const isDone = isCompletedOn(h, currentDay)
+        li.classList.toggle('is-completed', isDone)
         li.dataset.id = h.id
         const checkbox = li.querySelector('.task-checkbox')
         const name = li.querySelector('.task-name')
         const streak = li.querySelector('.task-streak')
         if (checkbox) {
-            checkbox.checked = isCompletedOn(h, today)
-            checkbox.title = 'Отметить выполнение за сегодня'
-            checkbox.setAttribute('aria-label', `Выполнено сегодня: ${h.name}`)
+            checkbox.checked = isDone
+            const dayTitle = formatDayTitleByKey(currentDay)
+            checkbox.title = `Отметить выполнение за ${dayTitle}`
+            checkbox.setAttribute(
+                'aria-label',
+                `Выполнено за ${dayTitle}: ${h.name}`
+            )
         }
         if (name) name.textContent = h.name
         if (streak) {
@@ -523,8 +624,9 @@ function renderStatsView(habits) {
 function render(habits, activeTab) {
     if (!activeTab) activeTab = localStorage.getItem(TAB_KEY) || 'list'
     renderTabs(activeTab)
+    renderDaySwitcher(activeTab)
     if (activeTab === 'list') {
-        renderListView(habits)
+        renderListView(habits, selectedDayKey)
     } else {
         renderStatsView(habits)
     }
@@ -561,7 +663,7 @@ function bindEvents() {
         const habits = loadHabits()
         const idx = habits.findIndex((x) => x.id === id)
         if (idx === -1) return
-        setCompletion(habits[idx], todayKey(), t.checked)
+        setCompletion(habits[idx], selectedDayKey, t.checked)
         saveHabits(habits)
         render(habits, 'list')
     })
