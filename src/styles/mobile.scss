@@ -19,6 +19,10 @@
     max-width: 60vw;
 }
 
+.day-switcher {
+    justify-content: flex-start;
+}
+
 .task-list {
     .task-item {
         --swipe-action-button-width: 96px;
