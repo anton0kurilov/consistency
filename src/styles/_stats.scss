@@ -10,7 +10,11 @@
 
 .habit-stats {
     display: grid;
-    gap: 16px;
+    gap: calc(var(--spacing) * 5);
+    padding: 12px;
+    background-color: #111;
+    border: 1px solid var(--color-secondary);
+    border-radius: 8px;
 }
 
 .habit-stats__header {
@@ -32,6 +36,7 @@
 
 .stat-card {
     border: 1px solid var(--color-secondary);
+    background-color: var(--color-background);
     border-radius: 8px;
     padding: 12px;
     display: flex;

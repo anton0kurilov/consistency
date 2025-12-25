@@ -76,5 +76,21 @@
 }
 
 .app-footer {
-    margin-bottom: calc(var(--size-font-m) + 16px + (var(--spacing) * 4) * 2);
+    margin-bottom: calc(var(--size-font-m) + 16px + (var(--spacing) * 6) * 2);
+}
+
+.habit-stats__cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.stat-card--streak {
+    grid-column: 1 / -1;
+}
+
+.stat-card--totals {
+    grid-column: 1;
+}
+
+.stat-card--heatmap {
+    grid-column: 2;
 }
