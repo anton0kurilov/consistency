@@ -1,5 +1,4 @@
 .day-switcher {
-    --day-switcher-active-text: #000;
     --day-switcher-accent: #d94b3b;
 
     display: flex;
@@ -10,7 +9,7 @@
     padding: 10px 12px;
     overflow-x: auto;
     scrollbar-width: thin;
-    background-color: #111;
+    background-color: var(--color-box-background);
     border-radius: 16px;
     border: 1px solid var(--color-secondary);
     justify-content: center;
@@ -21,44 +20,43 @@
         background-color: var(--color-secondary);
         border-radius: 999px;
     }
-}
-
-.day-switcher__btn {
-    background-color: transparent;
-    color: var(--color-tertiary);
-    border: 1px solid transparent;
-    padding: 10px 12px;
-    border-radius: 12px;
-    min-width: 64px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    font-size: 14px;
-    line-height: 1.1;
-    white-space: nowrap;
-    transition: background-color 160ms ease, border-color 160ms ease,
-        color 160ms ease, transform 160ms ease;
-    &:hover {
-        border-color: var(--color-secondary);
-    }
-    &:focus-visible {
-        outline: 2px solid var(--color-brand);
-        outline-offset: 2px;
-    }
-    &.is-active {
-        background-color: var(--color-brand);
-        border-color: var(--color-brand);
-        color: #000;
-        transform: translateY(-1px);
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    &__btn {
+        background-color: transparent;
+        color: var(--color-tertiary);
+        border: 1px solid transparent;
+        padding: 10px 12px;
+        border-radius: 12px;
+        min-width: 64px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        font-size: 14px;
+        line-height: 1.1;
+        white-space: nowrap;
+        transition: background-color 160ms ease, border-color 160ms ease,
+            color 160ms ease, transform 160ms ease;
+        &:hover {
+            border-color: var(--color-secondary);
+        }
+        &:focus-visible {
+            outline: 2px solid var(--color-brand);
+            outline-offset: 2px;
+        }
+        &.is-active {
+            background-color: var(--color-brand);
+            border-color: var(--color-brand);
+            color: #000;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+        }
     }
 }
 
 .day-switcher__date {
     font-size: 16px;
     font-weight: 700;
-    color: var(--day-switcher-text);
+    color: var(--color-text);
 }
 
 .day-switcher__weekday {

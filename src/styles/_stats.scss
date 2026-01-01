@@ -12,7 +12,7 @@
     display: grid;
     gap: calc(var(--spacing) * 5);
     padding: 12px;
-    background-color: #111;
+    background-color: var(--color-box-background);
     border: 1px solid var(--color-secondary);
     border-radius: 8px;
 }
