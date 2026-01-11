@@ -1,5 +1,6 @@
 .day-switcher {
     --day-switcher-accent: #d94b3b;
+    --day-switcher-active-text: #000;
 
     display: flex;
     align-items: center;
@@ -12,7 +13,6 @@
     background-color: var(--color-box-background);
     border-radius: 16px;
     border: 1px solid var(--color-secondary);
-    justify-content: center;
     &::-webkit-scrollbar {
         height: 6px;
     }
@@ -63,7 +63,7 @@
     font-size: 12px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--day-switcher-text);
+    color: var(--color-tertiary);
 }
 
 .day-switcher__btn.is-active .day-switcher__weekday {
