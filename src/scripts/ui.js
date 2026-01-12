@@ -12,7 +12,13 @@ import {
     todayKey,
     uid,
 } from './utils.js'
-import {calcCompletionStats, calcStreak, getCompletionsSet, isCompletedOn, setCompletion} from './domain.js'
+import {
+    calcCompletionStats,
+    calcStreak,
+    getCompletionsSet,
+    isCompletedOn,
+    setCompletion,
+} from './domain.js'
 import {loadHabits, saveHabits} from './storage.js'
 
 let selectedDayKey = todayKey()
@@ -221,12 +227,10 @@ function renderDaySwitcher(activeTab) {
             btn.className = 'btn day-switcher__btn'
             btn.dataset.dateKey = key
             const ariaLabelSuffix =
-                isToday || isYesterday
-                    ? isToday
-                        ? 'Сегодня'
-                        : 'Вчера'
-                    : ''
-            btn.title = ariaLabelSuffix ? `${title} • ${ariaLabelSuffix}` : title
+                isToday || isYesterday ? (isToday ? 'Сегодня' : 'Вчера') : ''
+            btn.title = ariaLabelSuffix
+                ? `${title} • ${ariaLabelSuffix}`
+                : title
             btn.setAttribute('aria-label', btn.title)
 
             const dateEl = document.createElement('span')
@@ -504,7 +508,10 @@ function bindEvents() {
                 closeSwipe(li)
             }
             const currentName = habits[idx].name
-            const nextName = prompt('Введите новое название привычки', currentName)
+            const nextName = prompt(
+                'Введите новое название привычки',
+                currentName
+            )
             if (nextName === null) return
             const trimmed = nextName.trim()
             if (!trimmed) {
