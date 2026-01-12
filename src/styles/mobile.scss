@@ -12,9 +12,7 @@
         bottom: 0;
         right: 0;
         left: 0;
-        padding-bottom: calc(
-            var(--spacing) * 4 + env(safe-area-inset-bottom)
-        );
+        padding-bottom: calc(var(--spacing) * 4 + env(safe-area-inset-bottom));
     }
 }
 
@@ -29,7 +27,7 @@
 .task-list {
     .task-item {
         --swipe-action-button-width: 96px;
-        --swipe-actions-gap: 8px;
+        --swipe-actions-gap: calc(var(--spacing) * 2);
         --swipe-actions-width: calc(
             var(--swipe-action-button-width) * 2 + var(--swipe-actions-gap)
         );
@@ -87,7 +85,7 @@
 }
 
 .app-footer {
-    margin-bottom: calc(var(--size-font-m) + 16px + (var(--spacing) * 6) * 2);
+    margin-bottom: calc(var(--size-font-m) + (var(--spacing) * 16));
 }
 
 .habit-stats__cards {

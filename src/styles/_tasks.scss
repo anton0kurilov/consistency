@@ -5,9 +5,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: calc(var(--spacing) * 2);
     margin-bottom: calc(var(--spacing) * 5);
-    padding: 10px 12px;
+    padding: calc(var(--spacing) * 2.5) calc(var(--spacing) * 3);
     overflow-x: auto;
     scrollbar-width: thin;
     background-color: var(--color-box-background);
@@ -24,24 +24,27 @@
         background-color: transparent;
         color: var(--color-tertiary);
         border: 1px solid transparent;
-        padding: 10px 12px;
+        padding: calc(var(--spacing) * 2.5) calc(var(--spacing) * 3);
         border-radius: 12px;
         min-width: 64px;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 4px;
+        gap: var(--spacing);
         font-size: 14px;
         line-height: 1.1;
         white-space: nowrap;
-        transition: background-color 160ms ease, border-color 160ms ease,
-            color 160ms ease, transform 160ms ease;
+        transition:
+            background-color 160ms ease,
+            border-color 160ms ease,
+            color 160ms ease,
+            transform 160ms ease;
         &:hover {
             border-color: var(--color-secondary);
         }
         &:focus-visible {
             outline: 2px solid var(--color-brand);
-            outline-offset: 2px;
+            outline-offset: calc(var(--spacing) * 0.5);
         }
         &.is-active {
             background-color: var(--color-brand);
@@ -81,25 +84,25 @@
     .task-item {
         position: relative;
         display: block;
-        padding: 10px 0;
+        padding: calc(var(--spacing) * 2.5) 0;
         .task-swipe {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
+            gap: calc(var(--spacing) * 3);
         }
         .task-main {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
+            gap: calc(var(--spacing) * 3);
             flex: 1;
             min-width: 0;
         }
         .task-actions {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: calc(var(--spacing) * 2);
             flex-shrink: 0;
         }
         .task-actions .btn {
@@ -110,7 +113,7 @@
         .left {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: calc(var(--spacing) * 3);
             min-width: 0;
         }
         &.is-completed {
@@ -123,9 +126,9 @@
             font-weight: 600;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: var(--spacing);
             border-radius: 8px;
-            padding: 0 10px;
+            padding: 0 calc(var(--spacing) * 2.5);
             font-size: 16px;
             white-space: nowrap;
             flex-shrink: 0;
@@ -147,9 +150,9 @@
     background-color: transparent;
     color: var(--color-tertiary);
     font-size: var(--size-text-l);
-    padding: 8px 4px !important;
+    padding: calc(var(--spacing) * 2) calc(var(--spacing) * 1) !important;
     display: flex;
-    gap: 12px;
+    gap: calc(var(--spacing) * 3);
     div:first-child {
         width: 20px;
     }
@@ -158,12 +161,12 @@
 .add-form {
     display: flex;
     margin: calc(var(--spacing) * 3) 0;
-    gap: 10px;
+    gap: calc(var(--spacing) * 2.5);
     .add-input {
         background-color: transparent;
         border: 2px solid var(--color-secondary);
         color: var(--color-text);
-        padding: 8px 10px;
+        padding: calc(var(--spacing) * 2) calc(var(--spacing) * 2.5);
         border-radius: 8px;
         font-size: 16px;
         flex: 1;
@@ -187,7 +190,9 @@
     display: grid;
     place-items: center;
     cursor: pointer;
-    transition: background-color 120ms ease, border-color 120ms ease,
+    transition:
+        background-color 120ms ease,
+        border-color 120ms ease,
         opacity 120ms ease;
 
     &:hover {
@@ -195,7 +200,7 @@
     }
     &:focus-visible {
         outline: 2px solid var(--color-brand);
-        outline-offset: 2px;
+        outline-offset: calc(var(--spacing) * 0.5);
     }
     &::after {
         content: '';
