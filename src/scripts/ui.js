@@ -409,7 +409,7 @@ function renderStatsView(habits) {
         const totalsCard = cloneTemplate('tmpl-stats-info-card')
         totalsCard.classList.add('stat-card--totals')
         const totalsTitle = totalsCard.querySelector('.stat-card__title')
-        if (totalsTitle) totalsTitle.textContent = 'Выполненные дни'
+        if (totalsTitle) totalsTitle.textContent = 'Выполнено'
         const totalsValue = totalsCard.querySelector('.stat-card__value')
         if (totalsValue) totalsValue.textContent = String(totalCompletions)
         const totalsMeta = totalsCard.querySelector('.stat-card__meta')
