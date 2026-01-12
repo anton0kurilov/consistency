@@ -29,6 +29,8 @@ let openSwipeItem = null
 
 const SWIPE_ACTIONS_WIDTH_FALLBACK = 200
 const SWIPE_THRESHOLD_RATIO = 0.4
+const STREAK_ICON_PATH =
+    'M240-400q0 52 21 98.5t60 81.5q-1-5-1-9v-9q0-32 12-60t35-51l113-111 113 111q23 23 35 51t12 60v9q0 4-1 9 39-35 60-81.5t21-98.5q0-50-18.5-94.5T648-574q-20 13-42 19.5t-45 6.5q-62 0-107.5-41T401-690q-39 33-69 68.5t-50.5 72Q261-513 250.5-475T240-400Zm240 52-57 56q-11 11-17 25t-6 29q0 32 23.5 55t56.5 23q33 0 56.5-23t23.5-55q0-16-6-29.5T537-292l-57-56Zm0-492v132q0 34 23.5 57t57.5 23q18 0 33.5-7.5T622-658l18-22q74 42 117 117t43 163q0 134-93 227T480-80q-134 0-227-93t-93-227q0-129 86.5-245T480-840Z'
 
 function isSwipeEnabledEnvironment() {
     if (typeof window === 'undefined' || typeof navigator === 'undefined') {
@@ -44,6 +46,26 @@ function getSwipeElements(item) {
     const actions = item.querySelector('.task-actions')
     if (!main || !actions) return null
     return {main, actions}
+}
+
+function createStreakIcon() {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+    svg.setAttribute('viewBox', '0 -960 960 960')
+    svg.setAttribute('aria-hidden', 'true')
+    svg.setAttribute('focusable', 'false')
+    svg.classList.add('streak-icon')
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+    path.setAttribute('d', STREAK_ICON_PATH)
+    path.setAttribute('fill', 'currentColor')
+    svg.append(path)
+    return svg
+}
+
+function setStreakValue(element, value) {
+    if (!element) return
+    element.textContent = String(value)
+    element.append(' ')
+    element.append(createStreakIcon())
 }
 
 function getSwipeWidth(item, actions) {
@@ -154,7 +176,7 @@ function handleSwipePointerMove(e) {
 
     const next = Math.max(
         -swipeState.maxReveal,
-        Math.min(0, swipeState.startTranslate + deltaX)
+        Math.min(0, swipeState.startTranslate + deltaX),
     )
     applySwipeTranslate(swipeState, next)
     e.preventDefault()
@@ -250,7 +272,7 @@ function renderDaySwitcher(activeTab) {
                 render(habits, 'list')
             })
             wrap.append(btn)
-        }
+        },
     )
 
     container.hidden = false
@@ -280,12 +302,12 @@ function renderListView(habits, dayKey) {
             checkbox.title = `Отметить выполнение за ${dayTitle}`
             checkbox.setAttribute(
                 'aria-label',
-                `Выполнено за ${dayTitle}: ${h.name}`
+                `Выполнено за ${dayTitle}: ${h.name}`,
             )
         }
         if (name) name.textContent = h.name
         if (streak) {
-            streak.textContent = `${calcStreak(h)} 🔥`
+            setStreakValue(streak, calcStreak(h))
             streak.title = 'Текущий стрик'
         }
         list.append(li)
@@ -376,7 +398,7 @@ function renderStatsView(habits) {
         const streakTitle = streakCard.querySelector('.stat-card__title')
         if (streakTitle) streakTitle.textContent = 'Текущий стрик'
         const streakValue = streakCard.querySelector('.stat-card__value')
-        if (streakValue) streakValue.textContent = `${streakCount} 🔥`
+        setStreakValue(streakValue, streakCount)
         const streakMeta = streakCard.querySelector('.stat-card__meta')
         if (streakMeta) {
             const word = pluralize(streakCount, ['день', 'дня', 'дней'])
@@ -417,8 +439,8 @@ function renderStatsView(habits) {
                     const statusLabel = isFuture
                         ? 'день ещё не наступил'
                         : done
-                        ? 'выполнено'
-                        : 'не выполнено'
+                          ? 'выполнено'
+                          : 'не выполнено'
                     cell.title = `${key} • ${statusLabel}`
                     cell.setAttribute('aria-label', `${key}: ${statusLabel}`)
                     col.append(cell)
@@ -510,7 +532,7 @@ function bindEvents() {
             const currentName = habits[idx].name
             const nextName = prompt(
                 'Введите новое название привычки',
-                currentName
+                currentName,
             )
             if (nextName === null) return
             const trimmed = nextName.trim()

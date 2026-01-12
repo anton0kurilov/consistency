@@ -55,6 +55,9 @@
 .stat-card__value {
     font-size: calc(var(--size-font-l) * 1.3);
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .stat-card__meta {

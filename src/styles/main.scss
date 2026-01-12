@@ -76,6 +76,14 @@ body {
     }
 }
 
+.streak-icon {
+    width: 1.15em;
+    height: 1.15em;
+    display: block;
+    flex-shrink: 0;
+    transform: translateY(-1.5px);
+}
+
 :focus-visible {
     outline: 2px solid var(--color-brand);
     outline-offset: 2px;
