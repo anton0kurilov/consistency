@@ -149,13 +149,18 @@
 .add-btn {
     background-color: transparent;
     color: var(--color-tertiary);
-    font-size: var(--size-text-l);
-    padding: calc(var(--spacing) * 2) calc(var(--spacing) * 1) !important;
-    display: flex;
-    gap: calc(var(--spacing) * 3);
-    div:first-child {
-        width: 20px;
-    }
+    font-size: var(--size-font-s);
+    padding: calc(var(--spacing) * 2) calc(var(--spacing) * 3)
+        calc(var(--spacing) * 2) calc(var(--spacing) * 2) !important;
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--spacing) * 2);
+}
+
+.add-btn__icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
 }
 
 .add-form {

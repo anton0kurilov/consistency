@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
     <head>
         <meta charset="UTF-8" />
@@ -92,8 +92,22 @@
         </template>
 
         <template id="tmpl-add-button">
-            <button class="btn btn-ghost" title="Добавить новую привычку">
-                Добавить привычку
+            <button
+                class="btn btn-ghost add-btn"
+                title="Добавить новую привычку"
+            >
+                <svg
+                    class="add-btn__icon"
+                    viewBox="0 -960 960 960"
+                    aria-hidden="true"
+                    focusable="false"
+                >
+                    <path
+                        d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"
+                        fill="currentColor"
+                    />
+                </svg>
+                <span>Добавить привычку</span>
             </button>
         </template>
 
