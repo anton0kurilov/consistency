@@ -12,6 +12,7 @@
     --size-font-m: 18px;
     --size-font-l: 24px;
     --spacing: 0.25rem;
+    --border-radius: 8px;
 }
 
 * {
@@ -59,7 +60,7 @@ body {
     padding: calc(var(--spacing) * 2) calc(var(--spacing) * 3);
     font-weight: 600;
     cursor: pointer;
-    border-radius: 8px;
+    border-radius: var(--border-radius);
     line-height: 1;
     user-select: none;
     &-primary {
@@ -130,7 +131,7 @@ body {
     background-color: var(--color-box-background);
     border: 1px solid var(--color-secondary);
     padding: calc(var(--spacing) * 2.5) calc(var(--spacing) * 3);
-    border-radius: 16px;
+    border-radius: calc(var(--border-radius) * 2);
 }
 
 #add-bar {

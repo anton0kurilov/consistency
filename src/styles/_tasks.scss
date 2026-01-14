@@ -11,7 +11,7 @@
     overflow-x: auto;
     scrollbar-width: thin;
     background-color: var(--color-box-background);
-    border-radius: 16px;
+    border-radius: calc(var(--border-radius) * 2);
     border: 1px solid var(--color-secondary);
     &::-webkit-scrollbar {
         height: 6px;
@@ -25,7 +25,7 @@
         color: var(--color-tertiary);
         border: 1px solid transparent;
         padding: calc(var(--spacing) * 2.5) calc(var(--spacing) * 3);
-        border-radius: 12px;
+        border-radius: calc(var(--border-radius) * 1.5);
         min-width: 64px;
         display: flex;
         flex-direction: column;
@@ -127,7 +127,7 @@
             display: inline-flex;
             align-items: center;
             gap: var(--spacing);
-            border-radius: 8px;
+            border-radius: var(--border-radius);
             padding: 0 calc(var(--spacing) * 2.5);
             font-size: 16px;
             white-space: nowrap;
@@ -172,7 +172,7 @@
         border: 2px solid var(--color-secondary);
         color: var(--color-text);
         padding: calc(var(--spacing) * 2) calc(var(--spacing) * 2.5);
-        border-radius: 8px;
+        border-radius: var(--border-radius);
         font-size: 16px;
         flex: 1;
         &::placeholder {
@@ -190,7 +190,7 @@
     width: 20px;
     height: 20px;
     border: 2px solid var(--color-secondary);
-    border-radius: 6px;
+    border-radius: calc(var(--border-radius) * 0.75);
     background: transparent;
     display: grid;
     place-items: center;
