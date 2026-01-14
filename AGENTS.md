@@ -25,6 +25,7 @@
 ## Commit & Pull Request Guidelines
 - Commit messages are short and imperative; many use Conventional Commit-style prefixes: `feat:`, `fix:`, `refactor:` (e.g., `feat: add day selector`).
 - PRs should include a concise summary, manual test notes, and screenshots for UI or layout changes.
+- After each completed task, propose a commit message.
 
 ## Data Storage & Configuration
 - The app stores data in `localStorage` using keys like `consistency:habits` and `consistency:lastTab`.
