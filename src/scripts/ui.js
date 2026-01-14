@@ -307,8 +307,10 @@ function renderListView(habits, dayKey) {
         }
         if (name) name.textContent = h.name
         if (streak) {
-            setStreakValue(streak, calcStreak(h))
+            const streakValue = calcStreak(h)
+            setStreakValue(streak, streakValue)
             streak.title = 'Текущий стрик'
+            streak.classList.toggle('is-ghost', streakValue === 0)
         }
         list.append(li)
     })

@@ -130,6 +130,10 @@
             flex-shrink: 0;
             height: 32px;
             line-height: 1;
+            &.is-ghost {
+                background-color: var(--color-secondary);
+                color: var(--color-tertiary);
+            }
         }
         .task-name {
             white-space: nowrap;
