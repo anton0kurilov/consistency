@@ -77,6 +77,22 @@
     width: 100%;
 }
 
+.sync-panel {
+    &__actions {
+        flex-direction: column;
+        .btn {
+            width: 100%;
+        }
+    }
+    &__account-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    &__status {
+        font-size: 12px;
+    }
+}
+
 .add-form {
     flex-direction: column;
     button {

@@ -1,4 +1,4 @@
-import {TAB_KEY} from './constants.js'
+import {SYNC_EVENT, TAB_KEY} from './constants.js'
 import {
     $$,
     addDays,
@@ -20,6 +20,16 @@ import {
     setCompletion,
 } from './domain.js'
 import {loadHabits, saveHabits} from './storage.js'
+import {
+    clearStoredSeed,
+    generateSeedPhrase,
+    getAccountIdFragment,
+    getStoredSeed,
+    isSyncConfigured,
+    normalizeSeed,
+    setStoredSeed,
+    syncOnce,
+} from './sync.js'
 
 let selectedDayKey = todayKey()
 
@@ -469,6 +479,8 @@ function render(habits, activeTab) {
     }
     const addBar = document.getElementById('add-bar')
     if (addBar) addBar.hidden = activeTab !== 'list'
+    const syncPanel = document.getElementById('sync-panel')
+    if (syncPanel) syncPanel.hidden = activeTab !== 'stats'
     const footer = document.querySelector('.app-footer')
     if (footer) footer.hidden = activeTab === 'list'
 }
@@ -557,10 +569,190 @@ function bindEvents() {
     document.addEventListener('pointerdown', handleGlobalPointerDown)
 }
 
+function initSyncPanel() {
+    const panel = document.getElementById('sync-panel')
+    if (!panel) return
+    const status = panel.querySelector('#sync-status')
+    const form = panel.querySelector('#sync-form')
+    const seedInput = panel.querySelector('#sync-seed')
+    const generateBtn = panel.querySelector('#sync-generate')
+    const copyBtn = panel.querySelector('#sync-copy')
+    const hint = panel.querySelector('.sync-panel__hint')
+    const account = panel.querySelector('#sync-account')
+    const accountId = panel.querySelector('#sync-account-id')
+    const connectedActions = panel.querySelector('#sync-connected-actions')
+    const loginBtn = panel.querySelector('#sync-login')
+    const switchBtn = panel.querySelector('#sync-switch')
+
+    if (
+        !status ||
+        !form ||
+        !(seedInput instanceof HTMLTextAreaElement) ||
+        !(generateBtn instanceof HTMLButtonElement) ||
+        !(copyBtn instanceof HTMLButtonElement) ||
+        !(loginBtn instanceof HTMLButtonElement) ||
+        !(switchBtn instanceof HTMLButtonElement)
+    ) {
+        return
+    }
+
+    const setStatus = (text, tone = 'muted') => {
+        status.textContent = text
+        status.className = `sync-panel__status is-${tone}`
+    }
+
+    const setControlsState = (connected) => {
+        if (account) account.hidden = !connected
+        if (connectedActions) connectedActions.hidden = !connected
+        form.hidden = connected
+        if (hint instanceof HTMLElement) hint.hidden = connected
+        generateBtn.disabled = false
+        seedInput.disabled = false
+    }
+
+    const updateAccountId = async () => {
+        if (!accountId) return
+        if (!seed) {
+            accountId.textContent = '—'
+            return
+        }
+        const fragment = await getAccountIdFragment(seed)
+        accountId.textContent = fragment || '—'
+    }
+
+    const copySeed = async () => {
+        if (!seed) return
+        try {
+            await navigator.clipboard.writeText(seed)
+            setStatus('Сид-фраза скопирована', 'ok')
+        } catch {
+            const temp = document.createElement('textarea')
+            temp.value = seed
+            temp.setAttribute('readonly', '')
+            temp.style.position = 'absolute'
+            temp.style.left = '-9999px'
+            document.body.append(temp)
+            temp.select()
+            document.execCommand('copy')
+            temp.remove()
+            setStatus('Сид-фраза скопирована', 'ok')
+        }
+    }
+
+    if (!isSyncConfigured()) {
+        setStatus('Нужно настроить Supabase', 'warn')
+        seedInput.disabled = true
+        generateBtn.disabled = true
+        if (account) account.hidden = true
+        if (connectedActions) connectedActions.hidden = true
+        form.hidden = false
+        return
+    }
+
+    let seed = normalizeSeed(getStoredSeed())
+    if (seed) {
+        seedInput.value = seed
+        setControlsState(true)
+        setStatus('Подключено', 'ok')
+        updateAccountId()
+    } else {
+        setControlsState(false)
+        setStatus('Не подключено', 'muted')
+        if (accountId) accountId.textContent = '—'
+    }
+
+    let syncTimer = null
+    let syncing = false
+
+    const runSync = async () => {
+        if (!seed || syncing) return
+        syncing = true
+        setStatus('Синхронизация…', 'progress')
+        try {
+            const result = await syncOnce(seed)
+            if (result.appliedRemote) {
+                const tab = localStorage.getItem(TAB_KEY) || 'list'
+                render(loadHabits(), tab)
+            }
+            if (result.status === 'pulled') {
+                setStatus('Получено из облака', 'ok')
+            } else if (result.status === 'pushed') {
+                setStatus('Отправлено в облако', 'ok')
+            } else if (result.status === 'up-to-date') {
+                setStatus('Уже актуально', 'ok')
+            } else if (result.status === 'seed-mismatch') {
+                setStatus('Сид-фраза не совпадает', 'error')
+            } else if (result.status === 'crypto-unavailable') {
+                setStatus('Нет WebCrypto в браузере', 'error')
+            } else if (result.status === 'not-configured') {
+                setStatus('Нужно настроить Supabase', 'warn')
+            } else if (result.status === 'no-seed') {
+                setStatus('Не подключено', 'muted')
+            } else {
+                setStatus('Ошибка синхронизации', 'error')
+            }
+        } catch {
+            setStatus('Ошибка синхронизации', 'error')
+        } finally {
+            syncing = false
+        }
+    }
+
+    const scheduleSync = () => {
+        if (!seed) return
+        if (syncTimer) window.clearTimeout(syncTimer)
+        syncTimer = window.setTimeout(runSync, 700)
+    }
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault()
+        const nextSeed = normalizeSeed(seedInput.value)
+        if (!nextSeed) {
+            setStatus('Введите сид-фразу', 'warn')
+            return
+        }
+        seed = nextSeed
+        seedInput.value = seed
+        setStoredSeed(seed)
+        setControlsState(true)
+        updateAccountId()
+        runSync()
+    })
+
+    generateBtn.addEventListener('click', () => {
+        seedInput.value = generateSeedPhrase()
+        seedInput.focus()
+    })
+
+    copyBtn.addEventListener('click', async () => {
+        await copySeed()
+    })
+
+    loginBtn.addEventListener('click', async () => {
+        await copySeed()
+    })
+
+    switchBtn.addEventListener('click', () => {
+        seed = ''
+        seedInput.value = ''
+        clearStoredSeed()
+        setControlsState(false)
+        setStatus('Не подключено', 'muted')
+        if (accountId) accountId.textContent = '—'
+    })
+
+    window.addEventListener(SYNC_EVENT, scheduleSync)
+
+    if (seed) {
+        runSync()
+    }
+}
+
 export function initApp() {
     const habits = loadHabits()
     // Default to list on first load
     const tab = localStorage.getItem(TAB_KEY) || 'list'
     render(habits, tab)
     bindEvents()
+    initSyncPanel()
 }
