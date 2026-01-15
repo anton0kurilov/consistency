@@ -78,6 +78,17 @@
 }
 
 .sync-panel {
+    &__summary {
+        flex-wrap: wrap;
+        row-gap: calc(var(--spacing) * 2);
+    }
+    &__title {
+        flex: 1 1 auto;
+    }
+    &__toggle-icon {
+        order: 2;
+        margin-left: auto;
+    }
     &__actions {
         flex-direction: column;
         .btn {
@@ -89,7 +100,13 @@
         align-items: flex-start;
     }
     &__status {
-        font-size: 12px;
+        font-size: 10px;
+        order: 3;
+        margin-left: 0;
+        flex: 0 0 100%;
+        width: 100%;
+        box-sizing: border-box;
+        white-space: nowrap;
     }
 }
 
