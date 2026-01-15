@@ -63,20 +63,21 @@
 }
 
 .heatmap {
-    display: flex;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: var(--spacing);
     overflow: hidden;
 }
 
 .week-col {
-    display: grid;
-    grid-auto-rows: 16px;
-    gap: var(--spacing);
+    display: contents;
 }
 
 .day-cell {
-    width: 14px;
-    height: 14px;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    box-sizing: border-box;
     border: 1px solid var(--color-secondary);
     border-radius: calc(var(--border-radius) * 0.25);
     background-color: transparent;
@@ -94,5 +95,15 @@
     &.is-future {
         opacity: 0.25;
         border-style: dashed;
+    }
+}
+
+@media screen and (max-width: 800px) and (min-width: 601px) {
+    .habit-stats__cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .stat-card--heatmap {
+        grid-column: 1 / -1;
     }
 }

@@ -433,7 +433,7 @@ function renderStatsView(habits) {
 
         const heatmapCard = cloneTemplate('tmpl-stats-heatmap-card')
         const heatmapTitle = heatmapCard.querySelector('.stat-card__title')
-        if (heatmapTitle) heatmapTitle.textContent = 'Последние 4 недели'
+        if (heatmapTitle) heatmapTitle.textContent = 'Последние 28 дней'
         const grid = heatmapCard.querySelector('.heatmap')
         if (grid) {
             const set = getCompletionsSet(habit)
