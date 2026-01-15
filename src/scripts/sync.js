@@ -1,5 +1,6 @@
 import {
     SYNC_ANON_KEY,
+    SYNC_ACCOUNT_ID_KEY,
     SYNC_ENDPOINT,
     SYNC_SEED_KEY,
     SYNC_TABLE,
@@ -92,7 +93,14 @@ export const getStoredSeed = () => localStorage.getItem(SYNC_SEED_KEY)
 export const setStoredSeed = (seed) =>
     localStorage.setItem(SYNC_SEED_KEY, normalizeSeed(seed))
 
-export const clearStoredSeed = () => localStorage.removeItem(SYNC_SEED_KEY)
+export const clearStoredSeed = () => {
+    localStorage.removeItem(SYNC_SEED_KEY)
+    localStorage.removeItem(SYNC_ACCOUNT_ID_KEY)
+}
+
+const getStoredAccountId = () => localStorage.getItem(SYNC_ACCOUNT_ID_KEY)
+
+const setStoredAccountId = (id) => localStorage.setItem(SYNC_ACCOUNT_ID_KEY, id)
 
 const sha256Hex = async (text) => {
     const data = encoder.encode(text)
@@ -224,12 +232,15 @@ export const syncOnce = async (seed) => {
     const localHabits = loadHabits()
     const localUpdatedAt = ensureLocalUpdatedAt(localHabits)
     const id = await sha256Hex(normalized)
+    const storedAccountId = getStoredAccountId()
+    const isNewAccount = storedAccountId !== id
 
     const remote = await fetchRemote(id)
     if (!remote || !remote.payload) {
         const payload = await encryptPayload(normalized, {habits: localHabits})
         const updatedAt = localUpdatedAt || Date.now()
         await upsertRemote(id, payload, updatedAt)
+        setStoredAccountId(id)
         return {status: 'pushed'}
     }
 
@@ -237,20 +248,32 @@ export const syncOnce = async (seed) => {
     if (!remoteData) return {status: 'seed-mismatch'}
 
     const remoteUpdatedAt = remote.updatedAt || 0
+    if (isNewAccount) {
+        const habits = Array.isArray(remoteData.habits) ? remoteData.habits : []
+        saveHabitsWithMeta(habits, {
+            updatedAt: remoteUpdatedAt,
+            silent: true,
+        })
+        setStoredAccountId(id)
+        return {status: 'pulled', appliedRemote: true}
+    }
     if (remoteUpdatedAt > localUpdatedAt) {
         const habits = Array.isArray(remoteData.habits) ? remoteData.habits : []
         saveHabitsWithMeta(habits, {
             updatedAt: remoteUpdatedAt,
             silent: true,
         })
+        setStoredAccountId(id)
         return {status: 'pulled', appliedRemote: true}
     }
 
     if (remoteUpdatedAt < localUpdatedAt) {
         const payload = await encryptPayload(normalized, {habits: localHabits})
         await upsertRemote(id, payload, localUpdatedAt)
+        setStoredAccountId(id)
         return {status: 'pushed'}
     }
 
+    setStoredAccountId(id)
     return {status: 'up-to-date'}
 }
