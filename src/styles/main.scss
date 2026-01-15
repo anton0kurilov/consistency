@@ -1,6 +1,6 @@
 @use './_tasks' as *;
 @use './_stats' as *;
-@use './stats' as *;
+@use './_sync' as *;
 
 :root {
     --color-background: #0d0d0d;
