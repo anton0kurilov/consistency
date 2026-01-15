@@ -17,6 +17,7 @@
 - JavaScript and SCSS, formatted by Prettier (`.prettierrc`): 4-space indentation, single quotes, no semicolons, print width 80.
 - Keep file names lowercase (`storage.js`, `mobile.scss`); SCSS partials start with `_`.
 - Use existing class naming patterns (BEM-ish like `habit-stats__title`).
+- Prefer nested SCSS selectors (use `&` for BEM blocks/elements/modifiers) instead of flat, repeated selectors.
 
 ## Testing Guidelines
 - Manual verification in the browser is the current expectation; ensure key flows (add/edit/delete habits, stats view) still work.
