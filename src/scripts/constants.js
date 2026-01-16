@@ -1,7 +1,7 @@
 export const STORAGE_KEY = 'consistency:habits'
 export const TAB_KEY = 'consistency:lastTab'
 export const MS_PER_DAY = 24 * 60 * 60 * 1000
-export const MAX_PAST_DAYS = 5
+export const MAX_PAST_DAYS = 6
 export const SYNC_ENDPOINT = 'https://gouwunhbxbmkvltrxmrn.supabase.co'
 export const SYNC_ANON_KEY = 'sb_publishable_2Hs1rdzSQEaoqHB9e2GN6A_J64fbm4F'
 export const SYNC_TABLE = 'sync_data'
