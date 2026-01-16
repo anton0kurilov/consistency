@@ -110,10 +110,17 @@
     }
 }
 
-.add-form {
-    flex-direction: column;
-    button {
+#add-bar .add-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    .add-input {
+        grid-column: 1 / -1;
         width: 100%;
+        box-sizing: border-box;
+    }
+    .btn {
+        width: 100%;
+        min-width: 0;
     }
 }
 
