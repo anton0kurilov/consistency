@@ -4,6 +4,7 @@ import {
     addDays,
     cloneTemplate,
     dateKey,
+    formatDateKeyShort,
     formatDayTitleByKey,
     getRecentDayOptions,
     pluralize,
@@ -453,8 +454,12 @@ function renderStatsView(habits) {
                         : done
                           ? 'выполнено'
                           : 'не выполнено'
-                    cell.title = `${key} • ${statusLabel}`
-                    cell.setAttribute('aria-label', `${key}: ${statusLabel}`)
+                    const shortDate = formatDateKeyShort(key)
+                    cell.title = `${shortDate} • ${statusLabel}`
+                    cell.setAttribute(
+                        'aria-label',
+                        `${shortDate}: ${statusLabel}`,
+                    )
                     col.append(cell)
                 }
                 grid.append(col)

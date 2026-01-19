@@ -1,7 +1,8 @@
 import {MAX_PAST_DAYS} from './constants.js'
 
 export const $ = (sel, root = document) => root.querySelector(sel)
-export const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel))
+export const $$ = (sel, root = document) =>
+    Array.from(root.querySelectorAll(sel))
 
 export const cloneTemplate = (id) => {
     const t = document.getElementById(id)
@@ -51,6 +52,14 @@ export const formatDayTitle = (date) =>
         day: '2-digit',
         month: 'long',
     }).format(date)
+
+export const formatDateKeyShort = (key) => {
+    const parsed = parseDateKeyToDate(key)
+    if (!parsed) return key
+    const day = String(parsed.getDate()).padStart(2, '0')
+    const month = String(parsed.getMonth() + 1).padStart(2, '0')
+    return `${day}.${month}.${parsed.getFullYear()}`
+}
 
 export const formatDayTitleByKey = (key) => {
     const parsed = parseDateKeyToDate(key)
