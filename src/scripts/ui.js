@@ -294,31 +294,43 @@ function renderListView(habits, dayKey) {
     const container = document.getElementById('view-list')
     if (!container) return
     const currentDay = dayKey || todayKey()
+    const sortedHabits = habits
+        .map((habit, index) => ({
+            habit,
+            index,
+            done: isCompletedOn(habit, currentDay),
+        }))
+        .sort((a, b) => {
+            if (a.done !== b.done) return a.done ? 1 : -1
+            const aOrder = typeof a.habit.order === 'number' ? a.habit.order : 0
+            const bOrder = typeof b.habit.order === 'number' ? b.habit.order : 0
+            if (aOrder !== bOrder) return aOrder - bOrder
+            return a.index - b.index
+        })
 
     const list = document.createElement('ul')
     list.className = 'task-list'
 
-    if (habits.length === 0) list.append('Привычек пока нет')
-    habits.forEach((h) => {
+    if (sortedHabits.length === 0) list.append('Привычек пока нет')
+    sortedHabits.forEach(({habit, done}) => {
         const li = cloneTemplate('tmpl-habit-item')
-        const isDone = isCompletedOn(h, currentDay)
-        li.classList.toggle('is-completed', isDone)
-        li.dataset.id = h.id
+        li.classList.toggle('is-completed', done)
+        li.dataset.id = habit.id
         const checkbox = li.querySelector('.task-checkbox')
         const name = li.querySelector('.task-name')
         const streak = li.querySelector('.task-streak')
         if (checkbox) {
-            checkbox.checked = isDone
+            checkbox.checked = done
             const dayTitle = formatDayTitleByKey(currentDay)
             checkbox.title = `Отметить выполнение за ${dayTitle}`
             checkbox.setAttribute(
                 'aria-label',
-                `Выполнено за ${dayTitle}: ${h.name}`,
+                `Выполнено за ${dayTitle}: ${habit.name}`,
             )
         }
-        if (name) name.textContent = h.name
+        if (name) name.textContent = habit.name
         if (streak) {
-            const streakValue = calcStreak(h)
+            const streakValue = calcStreak(habit)
             setStreakValue(streak, streakValue)
             streak.title = 'Текущий стрик'
             streak.classList.toggle('is-ghost', streakValue === 0)
