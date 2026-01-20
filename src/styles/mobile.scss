@@ -144,3 +144,7 @@
 .stat-card--heatmap {
     grid-column: 2;
 }
+
+.heatmap {
+    gap: var(--spacing);
+}
