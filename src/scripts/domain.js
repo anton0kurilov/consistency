@@ -1,5 +1,11 @@
 import {MS_PER_DAY} from './constants.js'
-import {addDays, dateKey, parseDateKeyToDate, todayKey, toStartOfDay} from './utils.js'
+import {
+    addDays,
+    dateKey,
+    parseDateKeyToDate,
+    todayKey,
+    toStartOfDay,
+} from './utils.js'
 
 export function getCompletionsSet(habit) {
     return new Set(habit.completions || [])
@@ -41,12 +47,17 @@ export function calcStreak(habit) {
 
 export function getHabitStartDate(habit) {
     const created = toStartOfDay(new Date(habit.createdAt))
-    if (created) return created
     const completions = Array.isArray(habit.completions)
         ? habit.completions.slice().sort()
         : []
-    if (completions.length === 0) return null
-    return parseDateKeyToDate(completions[0])
+    const firstCompletion =
+        completions.length > 0 ? parseDateKeyToDate(completions[0]) : null
+    if (created && firstCompletion) {
+        return created.getTime() <= firstCompletion.getTime()
+            ? created
+            : firstCompletion
+    }
+    return created || firstCompletion || null
 }
 
 export function getHabitActiveDays(habit) {
@@ -60,9 +71,25 @@ export function getHabitActiveDays(habit) {
 }
 
 export function calcCompletionStats(habit) {
-    const totalCompletions = getCompletionsSet(habit).size
-    const daysSinceStart = getHabitActiveDays(habit)
-    const totalDays = Math.max(daysSinceStart, totalCompletions)
+    const today = toStartOfDay(new Date())
+    let totalCompletions = 0
+    if (today) {
+        const set = new Set()
+        const completions = Array.isArray(habit.completions)
+            ? habit.completions
+            : []
+        completions.forEach((key) => {
+            if (typeof key !== 'string') return
+            const date = parseDateKeyToDate(key)
+            if (!date) return
+            if (date.getTime() > today.getTime()) return
+            set.add(key)
+        })
+        totalCompletions = set.size
+    } else {
+        totalCompletions = getCompletionsSet(habit).size
+    }
+    const totalDays = getHabitActiveDays(habit)
     const percent =
         totalDays > 0 ? Math.round((totalCompletions / totalDays) * 100) : 0
     return {totalCompletions, totalDays, completionPercent: percent}
