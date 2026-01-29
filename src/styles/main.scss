@@ -72,6 +72,10 @@ body {
         background-color: var(--color-secondary);
         color: var(--color-text);
     }
+    &-disruptive {
+        background-color: #3b1c1d;
+        color: #ff6467;
+    }
     &:hover,
     &:focus {
         opacity: 0.9;
