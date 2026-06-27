@@ -1,6 +1,19 @@
 .stats {
     display: grid;
     gap: calc(var(--spacing) * 5);
+    &__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: calc(var(--spacing) * 3);
+    }
+    &__title {
+        margin: 0;
+        font-size: var(--size-font-l);
+    }
+    &__reset {
+        flex-shrink: 0;
+    }
     &__empty {
         margin: 0;
         color: var(--color-tertiary);

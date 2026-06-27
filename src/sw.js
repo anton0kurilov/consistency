@@ -1,9 +1,39 @@
-const CACHE_VERSION = 'v1'
+const CACHE_VERSION = 'v2'
 const CACHE_NAME = `consistency-${CACHE_VERSION}`
 const SHELL_URL = new URL('./', self.location).toString()
 
-const cacheResponse = async (request, response) => {
+const hasContentType = (response, contentType) =>
+    response.headers.get('content-type')?.includes(contentType)
+
+const isCacheableResponse = (request, response) => {
     if (!response || response.status !== 200 || response.type === 'opaque') {
+        return false
+    }
+
+    if (request.destination === 'style') {
+        return hasContentType(response, 'text/css')
+    }
+    if (request.destination === 'script') {
+        return (
+            hasContentType(response, 'javascript') ||
+            hasContentType(response, 'ecmascript')
+        )
+    }
+    if (request.destination === 'manifest') {
+        return (
+            hasContentType(response, 'manifest+json') ||
+            hasContentType(response, 'application/json')
+        )
+    }
+    if (request.mode === 'navigate') {
+        return hasContentType(response, 'text/html')
+    }
+
+    return true
+}
+
+const cacheResponse = async (request, response) => {
+    if (!isCacheableResponse(request, response)) {
         return response
     }
 

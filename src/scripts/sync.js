@@ -223,6 +223,21 @@ const upsertRemote = async (id, payload, updatedAt) => {
     }
 }
 
+export const pushLocalState = async (seed) => {
+    if (!isSyncConfigured()) return {status: 'not-configured'}
+    if (!crypto?.subtle) return {status: 'crypto-unavailable'}
+    const normalized = normalizeSeed(seed)
+    if (!normalized) return {status: 'no-seed'}
+
+    const localHabits = loadHabits()
+    const localUpdatedAt = ensureLocalUpdatedAt(localHabits) || Date.now()
+    const id = await sha256Hex(normalized)
+    const payload = await encryptPayload(normalized, {habits: localHabits})
+    await upsertRemote(id, payload, localUpdatedAt)
+    setStoredAccountId(id)
+    return {status: 'pushed'}
+}
+
 export const syncOnce = async (seed) => {
     if (!isSyncConfigured()) return {status: 'not-configured'}
     if (!crypto?.subtle) return {status: 'crypto-unavailable'}
@@ -248,7 +263,9 @@ export const syncOnce = async (seed) => {
     if (!remoteData) return {status: 'seed-mismatch'}
 
     const remoteUpdatedAt = remote.updatedAt || 0
+    const hasLocalChanged = () => getLocalUpdatedAt() > localUpdatedAt
     if (isNewAccount) {
+        if (hasLocalChanged()) return {status: 'local-changed'}
         const habits = Array.isArray(remoteData.habits) ? remoteData.habits : []
         saveHabitsWithMeta(habits, {
             updatedAt: remoteUpdatedAt,
@@ -258,6 +275,7 @@ export const syncOnce = async (seed) => {
         return {status: 'pulled', appliedRemote: true}
     }
     if (remoteUpdatedAt > localUpdatedAt) {
+        if (hasLocalChanged()) return {status: 'local-changed'}
         const habits = Array.isArray(remoteData.habits) ? remoteData.habits : []
         saveHabitsWithMeta(habits, {
             updatedAt: remoteUpdatedAt,
@@ -268,8 +286,17 @@ export const syncOnce = async (seed) => {
     }
 
     if (remoteUpdatedAt < localUpdatedAt) {
-        const payload = await encryptPayload(normalized, {habits: localHabits})
-        await upsertRemote(id, payload, localUpdatedAt)
+        const latestLocalUpdatedAt = getLocalUpdatedAt()
+        const latestLocalHabits =
+            latestLocalUpdatedAt > localUpdatedAt ? loadHabits() : localHabits
+        const latestUpdatedAt =
+            latestLocalUpdatedAt > localUpdatedAt
+                ? latestLocalUpdatedAt
+                : localUpdatedAt
+        const payload = await encryptPayload(normalized, {
+            habits: latestLocalHabits,
+        })
+        await upsertRemote(id, payload, latestUpdatedAt)
         setStoredAccountId(id)
         return {status: 'pushed'}
     }

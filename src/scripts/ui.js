@@ -16,8 +16,9 @@ import {
 import {
     calcCompletionStats,
     calcStreak,
-    getCompletionsSet,
+    getStatsCompletionsSet,
     isCompletedOn,
+    resetHabitStats,
     setCompletion,
 } from './domain.js'
 import {loadHabits, saveHabits} from './storage.js'
@@ -28,6 +29,7 @@ import {
     getStoredSeed,
     isSyncConfigured,
     normalizeSeed,
+    pushLocalState,
     setStoredSeed,
     syncOnce,
 } from './sync.js'
@@ -399,6 +401,19 @@ function renderStatsView(habits) {
         return
     }
 
+    const header = document.createElement('header')
+    header.className = 'stats__header'
+    const title = document.createElement('h2')
+    title.className = 'stats__title'
+    title.textContent = 'Статистика'
+    const resetButton = document.createElement('button')
+    resetButton.type = 'button'
+    resetButton.className = 'btn btn-disruptive stats__reset'
+    resetButton.textContent = 'Сбросить статистику'
+    resetButton.title = 'Очистить исполнения задач и начать статистику заново'
+    header.append(title, resetButton)
+    wrap.append(header)
+
     const today = toStartOfDay(new Date())
     const weeks = 4
     const endWeek = startOfWeek(today, 1)
@@ -449,7 +464,7 @@ function renderStatsView(habits) {
         if (heatmapTitle) heatmapTitle.textContent = 'Последние 4 недели'
         const grid = heatmapCard.querySelector('.heatmap')
         if (grid) {
-            const set = getCompletionsSet(habit)
+            const set = getStatsCompletionsSet(habit)
             for (let w = 0; w < weeks; w++) {
                 const col = cloneTemplate('tmpl-heatmap-week-col')
                 const weekStart = addDays(rangeStart, w * 7)
@@ -584,6 +599,22 @@ function bindEvents() {
     })
 
     document.addEventListener('pointerdown', handleGlobalPointerDown)
+
+    const statsView = document.getElementById('view-stats')
+    statsView?.addEventListener('click', (e) => {
+        const t = e.target
+        if (!(t instanceof HTMLElement)) return
+        if (!t.classList.contains('stats__reset')) return
+        const habits = loadHabits()
+        if (habits.length === 0) return
+        const confirmed = confirm(
+            'Сбросить статистику? Исполнения задач будут очищены, сами задачи останутся.',
+        )
+        if (!confirmed) return
+        const nextHabits = resetHabitStats(habits, todayKey())
+        saveHabits(nextHabits, {syncMode: 'push'})
+        render(nextHabits, 'stats')
+    })
 }
 
 function initSyncPanel() {
@@ -680,13 +711,22 @@ function initSyncPanel() {
 
     let syncTimer = null
     let syncing = false
+    let pendingSync = false
+    let pendingForcePush = false
 
-    const runSync = async () => {
-        if (!seed || syncing) return
+    const runSync = async ({forcePush = false} = {}) => {
+        if (!seed) return
+        if (syncing) {
+            pendingSync = true
+            pendingForcePush = pendingForcePush || forcePush
+            return
+        }
         syncing = true
         setStatus('Синхронизация…', 'progress')
         try {
-            const result = await syncOnce(seed)
+            const result = forcePush
+                ? await pushLocalState(seed)
+                : await syncOnce(seed)
             if (result.appliedRemote) {
                 const tab = localStorage.getItem(TAB_KEY) || 'list'
                 render(loadHabits(), tab)
@@ -697,6 +737,9 @@ function initSyncPanel() {
                 setStatus('Отправлено в облако', 'ok')
             } else if (result.status === 'up-to-date') {
                 setStatus('Уже актуально', 'ok')
+            } else if (result.status === 'local-changed') {
+                setStatus('Есть локальные изменения', 'progress')
+                pendingSync = true
             } else if (result.status === 'seed-mismatch') {
                 setStatus('Сид-фраза не совпадает', 'error')
             } else if (result.status === 'crypto-unavailable') {
@@ -712,13 +755,27 @@ function initSyncPanel() {
             setStatus('Ошибка синхронизации', 'error')
         } finally {
             syncing = false
+            if (pendingSync) {
+                const shouldForcePush = pendingForcePush
+                pendingSync = false
+                pendingForcePush = false
+                window.setTimeout(() => {
+                    runSync({forcePush: shouldForcePush})
+                }, 0)
+            }
         }
     }
 
-    const scheduleSync = () => {
+    const scheduleSync = (event) => {
         if (!seed) return
+        const forcePush = event?.detail?.syncMode === 'push'
+        pendingForcePush = pendingForcePush || forcePush
         if (syncTimer) window.clearTimeout(syncTimer)
-        syncTimer = window.setTimeout(runSync, 700)
+        syncTimer = window.setTimeout(() => {
+            const shouldForcePush = pendingForcePush
+            pendingForcePush = false
+            runSync({forcePush: shouldForcePush})
+        }, 700)
     }
 
     form.addEventListener('submit', (e) => {
