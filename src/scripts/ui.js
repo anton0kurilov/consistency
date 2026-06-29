@@ -401,19 +401,6 @@ function renderStatsView(habits) {
         return
     }
 
-    const header = document.createElement('header')
-    header.className = 'stats__header'
-    const title = document.createElement('h2')
-    title.className = 'stats__title'
-    title.textContent = 'Статистика'
-    const resetButton = document.createElement('button')
-    resetButton.type = 'button'
-    resetButton.className = 'btn btn-disruptive stats__reset'
-    resetButton.textContent = 'Сбросить статистику'
-    resetButton.title = 'Очистить исполнения задач и начать статистику заново'
-    header.append(title, resetButton)
-    wrap.append(header)
-
     const today = toStartOfDay(new Date())
     const weeks = 4
     const endWeek = startOfWeek(today, 1)
@@ -496,6 +483,16 @@ function renderStatsView(habits) {
 
         wrap.append(group)
     })
+
+    const actions = document.createElement('div')
+    actions.className = 'stats__actions'
+    const resetButton = document.createElement('button')
+    resetButton.type = 'button'
+    resetButton.className = 'btn btn-disruptive stats__reset'
+    resetButton.textContent = 'Сбросить статистику'
+    resetButton.title = 'Очистить исполнения задач и начать статистику заново'
+    actions.append(resetButton)
+    wrap.append(actions)
 
     container.replaceChildren(wrap)
 }

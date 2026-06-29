@@ -1,15 +1,11 @@
 .stats {
     display: grid;
     gap: calc(var(--spacing) * 5);
-    &__header {
+    &__actions {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content: flex-end;
         gap: calc(var(--spacing) * 3);
-    }
-    &__title {
-        margin: 0;
-        font-size: var(--size-font-l);
     }
     &__reset {
         flex-shrink: 0;
